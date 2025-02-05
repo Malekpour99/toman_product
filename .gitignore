@@ -169,3 +169,9 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Django ORM database migration files
+**/migrations/*.py
+**/migrations/*.pyc
+_migrations/*
+!_migrations/__init__.py
