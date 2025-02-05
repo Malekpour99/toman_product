@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -9,6 +9,7 @@ from drf_spectacular.views import (
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("products/", include("products.urls")),
 ]
 
 # Swagger/ReDoc API documentation endpoints for DEBUG mode only
