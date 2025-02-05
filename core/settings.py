@@ -23,6 +23,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "drf_spectacular",
     # Project Apps
+    "common.apps.CommonConfig",
     "products.apps.ProductsConfig",
 ]
 
