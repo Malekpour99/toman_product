@@ -1,0 +1,22 @@
+
+# General Modules
+pillow
+python-decouple
+django>4.2,<4.3
+djangorestframework
+
+# Third-party Modules
+markdown
+django-filter
+drf-spectacular
+djangorestframework-simplejwt
+django-cors-headers
+
+# Linter & Testing
+black
+flake8
+pytest
+pytest-django
+
+
+
