@@ -175,3 +175,5 @@ cython_debug/
 **/migrations/*.pyc
 _migrations/*
 !_migrations/__init__.py
+
+media/*
