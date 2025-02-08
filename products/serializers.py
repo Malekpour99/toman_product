@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
 from .models import Product, ProductImage
 
@@ -18,12 +17,11 @@ class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child=serializers.ImageField(
-            max_length=100000,
-            allow_empty_file=False,
-            use_url=False
-        ), 
-        write_only=True, 
-        required=False
+            required=False, allow_empty_file=False, use_url=True
+        ),
+        required=False,
+        write_only=True,
+        allow_empty=True,
     )
 
     class Meta:
@@ -39,16 +37,16 @@ class ProductSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
-        def validate(self, data):
-            # Validate uploaded images
-            uploaded_images = data.get('uploaded_images', [])
-            
-            if uploaded_images and len(uploaded_images) > 5:
-                raise serializers.ValidationError({
-                    "uploaded_images": "You can upload a maximum of 5 images"
-                })
-            
-            return data
+    def validate(self, data):
+        # Validate uploaded images
+        uploaded_images = data.get("uploaded_images", [])
+
+        if uploaded_images and len(uploaded_images) > 5:
+            raise serializers.ValidationError(
+                {"uploaded_images": "You can upload a maximum of 5 images"}
+            )
+
+        return data
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", [])
