@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party Apps
     "rest_framework",
+    "rest_framework.authtoken",
     "drf_spectacular",
     # Project Apps
     "common.apps.CommonConfig",
@@ -105,14 +106,25 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_AUTHENTICATION_CLASSES": [],
+    "DEFAULT_PARSER_CLASSES": [
+        "rest_framework.parsers.MultiPartParser",
+        "rest_framework.parsers.FormParser",
+        "rest_framework.parsers.JSONParser",
+    ],
 }
 
 # SPECTACULAR settings for API documentation (swagger)
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Toman API",
+    "TITLE": "Product API",
     "DESCRIPTION": "",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "persistAuthorization": True,
+        "displayRequestDuration": True,
+    },
 }
 
 # CORS Headers configuration
