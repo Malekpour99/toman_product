@@ -6,6 +6,9 @@ from common.const import PRODUCT_IMAGE_MAX_SIZE, PRODUCT_IMAGE_MAX_COUNT
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
+    """
+    ProductImage model srializer
+    """
     class Meta:
         model = ProductImage
         fields = [
@@ -16,6 +19,10 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 
 class EmptyValidatingImageField(serializers.ImageField):
+    """
+    Customized image filed which prevent getting errors when
+    submitting empty lists which should contain images
+    """
     def to_internal_value(self, data):
         # If data is None or empty, return None
         if not data:
@@ -24,6 +31,9 @@ class EmptyValidatingImageField(serializers.ImageField):
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    """
+    Product model serializer with customized created and update methods
+    """
     images = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
         child=EmptyValidatingImageField(
@@ -48,6 +58,12 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def validate_uploaded_images(self, value):
+        """
+        Validates uploaded images
+        - data-type: list
+        - length < PRODUCT_IMAGE_MAX_SIZE
+        - sanitize its values by removing None values
+        """
         if not isinstance(value, list):
             raise serializers.ValidationError(
                 "Invalid format. Expected a list of images."
@@ -68,6 +84,9 @@ class ProductSerializer(serializers.ModelSerializer):
         return [image for image in value if image is not None]
 
     def create(self, validated_data):
+        """
+        Creating products and their associated images
+        """
         uploaded_images = validated_data.pop("uploaded_images", [])
         product = Product.objects.create(**validated_data)
 
@@ -77,6 +96,10 @@ class ProductSerializer(serializers.ModelSerializer):
         return product
 
     def update(self, instance, validated_data):
+        """
+        Updating products and their associated images considering image count limit
+        for each product
+        """
         uploaded_images = validated_data.pop("uploaded_images", [])
 
         # Update product fields

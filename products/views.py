@@ -9,12 +9,18 @@ from .serializers import ProductSerializer
 
 
 class ProductViewSet(viewsets.ModelViewSet):
+    """
+    Provides all CRUD operations for the product model
+    """
     queryset = Product.objects.filter(is_deleted=False)
     serializer_class = ProductSerializer
     parser_classes = (MultiPartParser, FormParser)
 
     @transaction.atomic
     def destroy(self, request, *args, **kwargs):
+        """
+        By deleing each product, deletes its associated images
+        """
         product = self.get_object()
         # Delete associated images from storage
         for image in product.images.all():

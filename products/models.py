@@ -8,6 +8,9 @@ from common.const import PRODUCT_IMAGE_MAX_SIZE, PRODUCT_IMAGE_MAX_COUNT
 
 
 def validate_file_size(value):
+    """
+    Validates product image file size based on the specified limit
+    """
     filesize = value.size
     if filesize > PRODUCT_IMAGE_MAX_SIZE:
         raise ValidationError(
@@ -16,6 +19,12 @@ def validate_file_size(value):
 
 
 class Product(BaseModel):
+    """
+    simple model for products:
+        title: Product's title 
+        price: Product's price
+        description: Product's description
+    """
     title = models.CharField(max_length=255)
     price = models.IntegerField()
     description = models.TextField()
@@ -25,6 +34,9 @@ class Product(BaseModel):
 
 
 class ProductImage(BaseModel):
+    """
+    Holds associated image file records for each product object
+    """
     product = models.ForeignKey(
         Product,
         related_name="images",
