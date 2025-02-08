@@ -1,6 +1,8 @@
 from rest_framework import serializers
 
+from common.utils import normalize_size
 from .models import Product, ProductImage
+from common.const import PRODUCT_IMAGE_MAX_SIZE, PRODUCT_IMAGE_MAX_COUNT
 
 
 class ProductImageSerializer(serializers.ModelSerializer):
@@ -37,16 +39,27 @@ class ProductSerializer(serializers.ModelSerializer):
             "updated_at",
         ]
 
-    def validate(self, data):
-        # Validate uploaded images
-        uploaded_images = data.get("uploaded_images", [])
+    def validate_uploaded_images(self, value):
+        if value is None:
+            return []
 
-        if uploaded_images and len(uploaded_images) > 5:
+        if not isinstance(value, list):
+            raise serializers.ValidationError(
+                "Invalid format. Expected a list of images."
+            )
+
+        if len(value) > PRODUCT_IMAGE_MAX_COUNT:
             raise serializers.ValidationError(
                 {"uploaded_images": "You can upload a maximum of 5 images"}
             )
 
-        return data
+        for image in value:
+            if image.size > PRODUCT_IMAGE_MAX_SIZE:
+                raise serializers.ValidationError(
+                    f"Image {image.name} is too large. "
+                    f"Maximum size is {normalize_size(PRODUCT_IMAGE_MAX_SIZE)}"
+                )
+        return value
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", [])

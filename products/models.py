@@ -4,7 +4,7 @@ from django.core.validators import FileExtensionValidator
 
 from common.models import BaseModel
 from common.utils import normalize_size
-from common.const import PRODUCT_IMAGE_MAX_SIZE
+from common.const import PRODUCT_IMAGE_MAX_SIZE, PRODUCT_IMAGE_MAX_COUNT
 
 
 def validate_file_size(value):
@@ -47,8 +47,13 @@ class ProductImage(BaseModel):
 
     def clean(self):
         super().clean()
-        if self.product.images.filter(is_deleted=False).count() > 5:
-            raise ValidationError("A product can have at most 5 images.")
+        if (
+            self.product.images.filter(is_deleted=False).count()
+            > PRODUCT_IMAGE_MAX_COUNT
+        ):
+            raise ValidationError(
+                f"A product can have at most {str(PRODUCT_IMAGE_MAX_COUNT)} images."
+            )
 
     def save(self, *args, **kwargs):
         self.clean()
