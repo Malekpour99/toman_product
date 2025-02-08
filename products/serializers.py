@@ -15,10 +15,18 @@ class ProductImageSerializer(serializers.ModelSerializer):
         ]
 
 
+class EmptyValidatingImageField(serializers.ImageField):
+    def to_internal_value(self, data):
+        # If data is None or empty, return None
+        if not data:
+            return None
+        return super().to_internal_value(data)
+
+
 class ProductSerializer(serializers.ModelSerializer):
     images = ProductImageSerializer(many=True, read_only=True)
     uploaded_images = serializers.ListField(
-        child=serializers.ImageField(
+        child=EmptyValidatingImageField(
             required=False, allow_empty_file=False, use_url=True
         ),
         required=False,
@@ -40,9 +48,6 @@ class ProductSerializer(serializers.ModelSerializer):
         ]
 
     def validate_uploaded_images(self, value):
-        if value is None:
-            return []
-
         if not isinstance(value, list):
             raise serializers.ValidationError(
                 "Invalid format. Expected a list of images."
@@ -54,12 +59,13 @@ class ProductSerializer(serializers.ModelSerializer):
             )
 
         for image in value:
-            if image.size > PRODUCT_IMAGE_MAX_SIZE:
+            if image and image.size > PRODUCT_IMAGE_MAX_SIZE:
                 raise serializers.ValidationError(
                     f"Image {image.name} is too large. "
                     f"Maximum size is {normalize_size(PRODUCT_IMAGE_MAX_SIZE)}"
                 )
-        return value
+
+        return [image for image in value if image is not None]
 
     def create(self, validated_data):
         uploaded_images = validated_data.pop("uploaded_images", [])
@@ -80,8 +86,10 @@ class ProductSerializer(serializers.ModelSerializer):
 
         # Handle new images
         current_images_count = instance.images.count()
-        if current_images_count + len(uploaded_images) > 5:
-            raise serializers.ValidationError("Total number of images cannot exceed 5")
+        if current_images_count + len(uploaded_images) > PRODUCT_IMAGE_MAX_COUNT:
+            raise serializers.ValidationError(
+                f"Total number of images cannot exceed {str(PRODUCT_IMAGE_MAX_COUNT)}"
+            )
 
         for image in uploaded_images:
             ProductImage.objects.create(product=instance, image=image)
