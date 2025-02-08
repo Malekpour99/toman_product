@@ -25,7 +25,9 @@ class ProductViewSet(viewsets.ModelViewSet):
         # Handle new images
         current_images_count = instance.images.count()
         if current_images_count + len(uploaded_images) > PRODUCT_IMAGE_MAX_COUNT:
-            raise serializers.ValidationError("Total number of images cannot exceed 5")
+            raise serializers.ValidationError(
+                f"Total number of images cannot exceed {str(PRODUCT_IMAGE_MAX_COUNT)}"
+            )
 
         for image in uploaded_images:
             ProductImage.objects.create(product=instance, image=image)
